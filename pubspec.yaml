@@ -1,0 +1,41 @@
+name: chatapp
+description: "A real-time chat application using Flutter and Firebase."
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0' # Menggunakan rentang SDK yang lebih standar
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Dependensi Firebase (Sesuai Langkah 0) ---
+  firebase_core: ^3.1.1       # WAJIB: Untuk menginisialisasi Firebase
+  firebase_auth: ^5.1.1     # Untuk Autentikasi (Login HP)
+  cloud_firestore: ^5.0.2   # Database Real-time (Simpan chat & user)
+  firebase_storage: ^12.1.0 # Untuk upload file (Foto Profil, Voice Note)
+  # -----------------------------------------------
+
+  # Ikon default iOS
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Linter untuk menjaga kualitas kode
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Untuk menambahkan aset seperti gambar (misal logo)
+  # assets:
+  #   - assets/images/logo.png
+
+  # Untuk menambahkan font kustom
+  # fonts:
+  #   - family: Poppins
+  #     fonts:
+  #
