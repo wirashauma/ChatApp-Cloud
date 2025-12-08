@@ -12,17 +12,36 @@ Aplikasi ini memiliki fitur komunikasi realtime dengan spesifikasi berikut:
 * Profile Management: Update nama dan foto profil (Firebase Storage).
 * Cloud Architecture: Aplikasi berjalan sepenuhnya di cloud tanpa backend server konvensional.
 
+## 💾 Struktur Database (Cloud Firestore)
+
+Aplikasi ini menggunakan database NoSQL dengan struktur koleksi sebagai berikut:
+
+### Collection: users
+Menyimpan data profil pengguna.
+* uid (Document ID): ID unik dari Firebase Auth
+* email: Alamat email pengguna
+* displayName: Nama tampilan
+* photoUrl: Link gambar profil dari Storage
+* createdAt: Timestamp pendaftaran
+
+### Collection: chat_rooms
+Menyimpan riwayat percakapan antar pengguna.
+* chatRoomId (Document ID): Kombinasi UID pengirim dan penerima
+* users: Array berisi email peserta chat
+* lastMessage: Pesan terakhir yang dikirim
+* lastTime: Waktu pesan terakhir
+
+### Sub-collection: messages
+Menyimpan detail pesan di dalam chat_rooms.
+* senderId: UID pengirim
+* text: Isi pesan text
+* timestamp: Waktu server saat dikirim
+
 ## 🛠️ Teknologi yang Digunakan
 
 * Frontend: Flutter (Dart)
-* Backend (BaaS): Firebase
-    * Authentication
-    * Cloud Firestore (NoSQL Database)
-    * Firebase Storage (Media/Image)
-* Platform: Android & Web
-
-## 📸 Screenshots
-*(Akan ditambahkan setelah UI final)*
+* Backend (BaaS): Firebase (Auth, Firestore, Storage)
+* State Management: Native SetState / StreamBuilder
 
 ## 📦 Cara Install
 
