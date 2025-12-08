@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      // Halaman pertama yang dibuka adalah 'AuthCheckScreen'
+      // Halaman pertama adalah 'AuthCheckScreen'
       home: AuthCheckScreen(), 
     );
   }
