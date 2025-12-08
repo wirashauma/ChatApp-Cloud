@@ -1,16 +1,35 @@
-# chatapp
+# Cloud Chat App (UAS Cloud Computing)
 
-A new Flutter project.
+Aplikasi Realtime Chat sederhana yang dibangun menggunakan Flutter dan Firebase (Serverless Architecture). Proyek ini dibuat untuk memenuhi Tugas Besar mata kuliah Cloud Computing.
 
-## Getting Started
+## 🚀 Fitur Utama
 
-This project is a starting point for a Flutter application.
+Aplikasi ini memiliki fitur komunikasi realtime dengan spesifikasi berikut:
 
-A few resources to get you started if this is your first Flutter project:
+* Authentication: Login dan Register menggunakan Email & Password (Firebase Auth).
+* User Search: Mencari pengguna lain berdasarkan email untuk memulai obrolan.
+* Realtime Messaging: Kirim dan terima pesan secara instan tanpa refresh (Cloud Firestore).
+* Profile Management: Update nama dan foto profil (Firebase Storage).
+* Cloud Architecture: Aplikasi berjalan sepenuhnya di cloud tanpa backend server konvensional.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛠️ Teknologi yang Digunakan
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* Frontend: Flutter (Dart)
+* Backend (BaaS): Firebase
+    * Authentication
+    * Cloud Firestore (NoSQL Database)
+    * Firebase Storage (Media/Image)
+* Platform: Android & Web
+
+## 📸 Screenshots
+*(Akan ditambahkan setelah UI final)*
+
+## 📦 Cara Install
+
+1.  Clone repository ini.
+2.  Jalankan flutter pub get untuk mengunduh dependency.
+3.  Pastikan file konfigurasi Firebase (google-services.json) sudah terpasang.
+4.  Jalankan flutter run.
+
+---
+Kelompok: [Isi Nama Kamu/Kelompok Disini]
