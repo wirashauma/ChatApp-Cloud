@@ -13,7 +13,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
 
@@ -34,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
-    
+
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email dan Password harus diisi.')),
@@ -42,13 +43,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Buat user baru dengan Firebase Auth
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -56,13 +61,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Jika sukses, user sekarang sudah login
       // Kita HARUS arahkan ke SetupProfileScreen agar mereka bisa isi nama
       if (userCredential.user != null && mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => SetupProfileScreen()),
           (route) => false, // Hapus semua riwayat navigasi
         );
       }
-
     } on FirebaseAuthException catch (e) {
       // Tangani error
       String message;
@@ -73,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else {
         message = 'Terjadi kesalahan. Coba lagi.';
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(message)),
       );
     } finally {
@@ -182,12 +185,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                               'Register',
-                              style: TextStyle(fontSize: 18, color: Colors.white),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
                             ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Tombol navigasi ke Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

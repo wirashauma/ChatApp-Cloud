@@ -31,6 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    final messenger = ScaffoldMessenger.of(context);
+
     setState(() {
       _isLoading = true;
     });
@@ -41,10 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      
+
       // Jika sukses, AuthCheckScreen akan otomatis menangani navigasi
       // Kita tidak perlu panggil Navigator.push di sini
-
     } on FirebaseAuthException catch (e) {
       // Tangani error
       String message;
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         message = 'Terjadi kesalahan. Coba lagi.';
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text(message)),
       );
     } finally {
@@ -148,12 +149,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                               'Login',
-                              style: TextStyle(fontSize: 18, color: Colors.white),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
                             ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Tombol navigasi ke Register
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
