@@ -10,6 +10,7 @@ class FirestoreService {
   static Future<void> saveUserProfile({
     required String displayName,
     required String bio,
+    String? photoUrl,
   }) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
@@ -17,12 +18,11 @@ class FirestoreService {
     String email = currentUser.email ?? '';
     String dummyPhotoUrl =
         "https://ssl.gstatic.com/images/silhouette/avatar-contact.png";
-
     Map<String, dynamic> userData = {
       'uid': uid,
       'displayName': displayName,
       'bio': bio,
-      'photoUrl': dummyPhotoUrl,
+      'photoUrl': photoUrl ?? dummyPhotoUrl,
       'email': email.toLowerCase(), // Simpan email sebagai lowercase
       'lastSeen': FieldValue.serverTimestamp(),
     };
@@ -38,14 +38,22 @@ class FirestoreService {
   }
 
   static Future<UserModel> getUserDetails(String uid) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw Exception('User not authenticated');
+    }
     DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
     return UserModel.fromFirestore(doc);
   }
 
   // --- FUNGSI BARU UNTUK MENCARI USER ---
   static Future<UserModel?> findUserByEmail(String email) async {
-    final String currentUserEmail =
-        FirebaseAuth.instance.currentUser?.email ?? '';
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final String currentUserEmail = currentUser.email ?? '';
 
     // 1. Cek jika user mencari emailnya sendiri
     if (email.toLowerCase() == currentUserEmail.toLowerCase()) {
