@@ -1,6 +1,7 @@
 import 'package:chatapp/screens/home_screen.dart'; // <-- 1. UBAH IMPORT DARI PROFILE KE HOME
 import 'package:chatapp/services/firestore_service.dart';
 import 'package:flutter/material.dart';
+import 'package:chatapp/widgets/initial_avatar.dart';
 
 class SetupProfileScreen extends StatefulWidget {
   const SetupProfileScreen({super.key});
@@ -29,6 +30,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       return;
     }
 
+    final navigator = Navigator.of(context);
+
     setState(() {
       _isLoading = true;
     });
@@ -42,8 +45,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       if (mounted) {
         // --- 2. INI DIA PERBAIKANNYA ---
         // Arahkan ke HomeScreen, bukan ProfileScreen
-        Navigator.pushAndRemoveUntil(
-          context,
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false, // Hapus semua riwayat navigasi
         );
@@ -70,12 +72,17 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
           child: Column(
             children: [
               // Foto Dummy
-              CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage(
-                  "https://ssl.gstatic.com/images/silhouette/avatar-contact.png",
+              // show initial avatar (no name yet)
+              SizedBox(
+                width: 120,
+                height: 120,
+                child: Center(
+                  child: InitialAvatar(
+                    name: '',
+                    photoUrl: null,
+                    radius: 60,
+                  ),
                 ),
-                backgroundColor: Colors.grey[300],
               ),
               const SizedBox(height: 16),
               Text(
