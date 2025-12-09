@@ -5,6 +5,7 @@ import 'package:chatapp/widgets/chat_bubble.dart'; // Widget gelembung chat (kit
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Untuk format tanggal/waktu
+import 'package:chatapp/widgets/initial_avatar.dart';
 
 // Simple date separator with fade-in animation
 class _DateSeparator extends StatefulWidget {
@@ -109,8 +110,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage(widget.recipient.photoUrl),
+            InitialAvatar(
+              photoUrl: widget.recipient.photoUrl,
+              name: widget.recipient.displayName,
               radius: 20,
             ),
             const SizedBox(width: 12),
