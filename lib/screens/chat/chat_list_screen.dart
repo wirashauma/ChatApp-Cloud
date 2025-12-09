@@ -61,20 +61,24 @@ class ChatListScreen extends StatelessWidget {
                             errorText = null;
                           });
 
+                          final navigator = Navigator.of(context);
+                          final dialogNavigator = Navigator.of(dialogContext);
+
                           try {
                             // 2. Panggil service
-                            UserModel? user = await FirestoreService.findUserByEmail(
-                                emailController.text.trim().toLowerCase());
+                            UserModel? user =
+                                await FirestoreService.findUserByEmail(
+                                    emailController.text.trim().toLowerCase());
 
                             // 3. Cek hasil
                             if (user != null) {
                               // User DITEMUKAN
-                              Navigator.pop(dialogContext); // Tutup dialog
+                              dialogNavigator.pop(); // Tutup dialog
                               // Langsung navigasi ke Chat Detail
-                              Navigator.push(
-                                context, // Gunakan context utama
+                              navigator.push(
                                 MaterialPageRoute(
-                                  builder: (context) => ChatDetailScreen(recipient: user),
+                                  builder: (context) =>
+                                      ChatDetailScreen(recipient: user),
                                 ),
                               );
                             } else {
@@ -88,7 +92,8 @@ class ChatListScreen extends StatelessWidget {
                             // Tangani error (misal: chat dengan diri sendiri)
                             stfSetState(() {
                               isLoading = false;
-                              errorText = e.toString().replaceFirst("Exception: ", "");
+                              errorText =
+                                  e.toString().replaceFirst("Exception: ", "");
                             });
                           }
                         },
