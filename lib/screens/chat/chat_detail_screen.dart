@@ -4,6 +4,7 @@ import 'package:chatapp/services/firestore_service.dart';
 import 'package:chatapp/widgets/chat_bubble.dart'; // Widget gelembung chat (kita buat)
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Untuk format tanggal/waktu
 
 class ChatDetailScreen extends StatefulWidget {
   final UserModel recipient; // Terima data user yang akan di-chat
@@ -18,12 +19,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
   final String _currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
+  @override
+  void initState() {
+    super.initState();
+    // Tandai semua pesan sebagai sudah dibaca saat layar dibuka
+    FirestoreService.markMessagesAsRead(widget.recipient.uid);
+  }
+
   // Fungsi kirim pesan
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
       FirestoreService.sendMessage(
         widget.recipient.uid,
         _messageController.text.trim(),
+        isRead: false, // Tambahkan parameter isRead
       );
       _messageController.clear(); // Kosongkan field
     }
@@ -77,14 +86,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     DocumentSnapshot doc = snapshot.data!.docs[index];
-                    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                    
+                    Map<String, dynamic> data =
+                        doc.data() as Map<String, dynamic>;
+
                     // Cek apakah pesan ini dari user saat ini
                     bool isMe = data['senderId'] == _currentUserId;
+
+                    // Ambil timestamp dan format waktu
+                    Timestamp timestamp = data['timestamp'] as Timestamp;
+                    String formattedTime =
+                        DateFormat('hh:mm a').format(timestamp.toDate());
 
                     return ChatBubble(
                       message: data['text'],
                       isMe: isMe,
+                      time: formattedTime, // Tambahkan waktu ke ChatBubble
+                      isRead:
+                          data['isRead'] ?? false, // Tambahkan parameter isRead
                     );
                   },
                 );
