@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:chatapp/widgets/initial_avatar.dart';
 
 class ChatListTile extends StatefulWidget {
   final DocumentSnapshot chatRoomDoc;
@@ -150,9 +151,12 @@ class _ChatListTileState extends State<ChatListTile> {
                     border: Border.all(
                         color: Colors.purple.withOpacity(0.18), width: 2),
                   ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(_otherUser!.photoUrl),
+                  child: Center(
+                    child: InitialAvatar(
+                      photoUrl: _otherUser!.photoUrl,
+                      name: _otherUser!.displayName,
+                      radius: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
