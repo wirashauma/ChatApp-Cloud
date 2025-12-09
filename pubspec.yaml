@@ -20,6 +20,9 @@ dependencies:
   # Ikon default iOS
   cupertino_icons: ^1.0.8
 
+  # Dependensi tambahan
+  intl: ^0.18.0 # Tambahkan dependensi untuk format tanggal/waktu
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -38,4 +41,6 @@ flutter:
   # fonts:
   #   - family: Poppins
   #     fonts:
-  #
+  #       - asset: assets/fonts/Poppins-Regular.ttf
+  #       - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
