@@ -79,7 +79,8 @@ class FirestoreService {
   }
 
   // 2. Mengirim pesan
-  static Future<void> sendMessage(String recipientId, String messageText) async {
+  static Future<void> sendMessage(String recipientId, String messageText,
+      {bool isRead = false}) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
 
@@ -91,16 +92,17 @@ class FirestoreService {
       'recipientId': recipientId,
       'text': messageText,
       'timestamp': timestamp,
+      'isRead': isRead, // Tambahkan properti isRead
     };
 
-    // 1. Tambahkan pesan ke sub-koleksi 'messages'
+    // Tambahkan pesan ke sub-koleksi 'messages'
     await _db
         .collection('chat_rooms')
         .doc(chatRoomId)
         .collection('messages')
         .add(newMessage);
 
-    // 2. PERBARUI dokumen 'chat_rooms' induk
+    // Perbarui dokumen 'chat_rooms' induk
     Map<String, dynamic> chatRoomData = {
       'participants': [currentUser.uid, recipientId],
       'lastMessage': messageText,
@@ -139,5 +141,25 @@ class FirestoreService {
         .where('participants', arrayContains: currentUser.uid)
         .orderBy('lastTimestamp', descending: true)
         .snapshots();
+  }
+
+  // Tandai semua pesan sebagai sudah dibaca
+  static Future<void> markMessagesAsRead(String recipientId) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final String chatRoomId = getChatRoomId(currentUser.uid, recipientId);
+
+    final QuerySnapshot messages = await _db
+        .collection('chat_rooms')
+        .doc(chatRoomId)
+        .collection('messages')
+        .where('recipientId', isEqualTo: currentUser.uid)
+        .where('isRead', isEqualTo: false)
+        .get();
+
+    for (var doc in messages.docs) {
+      await doc.reference.update({'isRead': true});
+    }
   }
 }
