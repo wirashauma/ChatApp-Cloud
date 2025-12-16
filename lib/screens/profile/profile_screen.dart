@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:chatapp/services/firestore_service.dart';
 import 'package:chatapp/screens/profile/account_screen.dart';
+import 'package:chatapp/screens/profile/help_screen.dart';
 import 'package:chatapp/screens/profile/chat_settings_screen.dart';
 import 'package:chatapp/screens/profile/notifications_screen.dart';
 import 'package:flutter/material.dart';
@@ -218,7 +219,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Icon(icon, color: Colors.grey[700]),
       title: Text(title, style: const TextStyle(fontSize: 16)),
       onTap: () {
-        // TODO: Tambahkan aksi untuk setiap menu
+        if (title == 'Help') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HelpScreen()),
+          );
+          return;
+        }
+        // TODO: Tambahkan aksi untuk menu lain
       },
     );
   }
