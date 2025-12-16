@@ -25,9 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Profile'),
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.purple[600],
           elevation: 0,
-          foregroundColor: Colors.black,
+          foregroundColor: Colors.white,
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -36,9 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.purple[600],
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<DocumentSnapshot>(
         // Ambil data user yang sedang login
