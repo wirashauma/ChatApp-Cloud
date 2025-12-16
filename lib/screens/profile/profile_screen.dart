@@ -5,6 +5,10 @@ import 'package:chatapp/screens/profile/account_screen.dart';
 import 'package:chatapp/screens/profile/chat_settings_screen.dart';
 import 'package:chatapp/screens/profile/notifications_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:chatapp/services/cloudinary_service.dart';
 import 'package:chatapp/widgets/initial_avatar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,6 +20,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoggingOut = false;
+  bool _isUploading = false;
+  File? _imageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -71,31 +77,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              // Bagian Header Profil
+              // Bagian Header Profil dengan avatar modern dan tombol camera
               Column(
                 children: [
-                  InitialAvatar(
-                    photoUrl: photoUrl,
-                    name: displayName,
-                    radius: 50,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      InitialAvatar(
+                        photoUrl: photoUrl,
+                        imageFile: _imageFile,
+                        name: displayName,
+                        radius: 56,
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: GestureDetector(
+                          onTap: _showPickOptions,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.purple[400],
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 6,
+                                )
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     displayName,
                     style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     bio,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.grey[700],
                     ),
                   ),
+                  if (_isUploading) ...[
+                    const SizedBox(height: 12),
+                    const LinearProgressIndicator(),
+                  ],
                 ],
               ),
               const SizedBox(height: 30),
@@ -178,6 +221,86 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
+    }
+  }
+
+  void _showPickOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take photo'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1200,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+
+      final file = File(picked.path);
+      setState(() {
+        _imageFile = file; // preview immediately
+      });
+
+      await _uploadAndSave(file);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih gambar: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadAndSave(File file) async {
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _isUploading = true);
+
+    try {
+      // Upload ke Cloudinary
+      final url = await CloudinaryService.uploadImage(file);
+
+      // Ambil data saat ini untuk tidak menimpa displayName/bio
+      final snapshot = await FirestoreService.getUserProfile();
+      final userData = snapshot.data() as Map<String, dynamic>;
+      final currentName = userData['displayName'] ?? '';
+      final currentBio = userData['bio'] ?? '';
+
+      await FirestoreService.saveUserProfile(
+        displayName: currentName,
+        bio: currentBio,
+        photoUrl: url,
+      );
+
+      messenger.showSnackBar(
+          const SnackBar(content: Text('Foto profil diperbarui')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Upload gagal: $e')));
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
     }
   }
 

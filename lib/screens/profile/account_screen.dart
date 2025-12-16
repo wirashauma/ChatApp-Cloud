@@ -11,6 +11,7 @@ import 'package:chatapp/widgets/initial_avatar.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const _AccountForm();
@@ -31,6 +32,9 @@ class _AccountFormState extends State<_AccountForm> {
   String? _existingPhotoUrl;
   bool _clearPhoto = false;
   bool _isSaving = false;
+
+  // small upload indicator when selecting image
+  bool _isPicking = false;
 
   @override
   void initState() {
@@ -59,6 +63,7 @@ class _AccountFormState extends State<_AccountForm> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     try {
+      setState(() => _isPicking = true);
       final XFile? picked =
           await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
       if (picked != null) {
@@ -79,7 +84,37 @@ class _AccountFormState extends State<_AccountForm> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Gagal memilih gambar: $e')));
       }
+    } finally {
+      if (mounted) setState(() => _isPicking = false);
     }
+  }
+
+  void _showPickOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take photo'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _saveProfile() async {
@@ -101,7 +136,11 @@ class _AccountFormState extends State<_AccountForm> {
 
       if (_imageFile != null && uid != null) {
         // upload new photo and use returned url
-        photoUrl = await CloudinaryService.uploadProfileImage(uid, _imageFile!);
+        photoUrl = await CloudinaryService.uploadImage(
+          _imageFile!,
+          publicId: uid,
+          folder: 'chatapp/profile_images',
+        );
       } else if (_clearPhoto) {
         // user requested to remove photo -> pass null so FirestoreService will set default
         photoUrl = null;
@@ -154,6 +193,7 @@ class _AccountFormState extends State<_AccountForm> {
           const SizedBox(height: 8),
           Center(
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
                 InitialAvatar(
                   imageFile: _imageFile,
@@ -163,47 +203,33 @@ class _AccountFormState extends State<_AccountForm> {
                       : null,
                   radius: 56,
                 ),
+                // (delete icon removed for cleaner UI)
+
+                // camera FAB bottom-right
                 Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_existingPhotoUrl != null || _imageFile != null)
-                        InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () {
-                            setState(() {
-                              _imageFile = null;
-                              _existingPhotoUrl = null;
-                              _clearPhoto = true;
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.delete_forever,
-                                size: 18, color: Colors.redAccent),
-                          ),
-                        ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: _pickImage,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.edit,
-                              size: 18, color: Colors.black87),
-                        ),
+                  right: -4,
+                  bottom: -4,
+                  child: GestureDetector(
+                    onTap: _showPickOptions,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.purple[600],
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 8,
+                          )
+                        ],
                       ),
-                    ],
+                      child: Icon(
+                        _isPicking ? Icons.hourglass_top : Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -214,6 +240,8 @@ class _AccountFormState extends State<_AccountForm> {
             controller: _nameController,
             decoration: InputDecoration(
               labelText: 'Display name',
+              filled: true,
+              fillColor: Colors.grey[100],
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             ),
@@ -224,6 +252,8 @@ class _AccountFormState extends State<_AccountForm> {
             maxLines: 3,
             decoration: InputDecoration(
               labelText: 'Bio',
+              filled: true,
+              fillColor: Colors.grey[100],
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             ),
@@ -231,15 +261,21 @@ class _AccountFormState extends State<_AccountForm> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _isSaving ? null : _saveProfile,
-            style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.purple[400]),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple[600],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             child: _isSaving
                 ? const SizedBox(
                     height: 18,
                     width: 18,
                     child: CircularProgressIndicator(
                         color: Colors.white, strokeWidth: 2))
-                : const Text('Save Profile'),
+                : const Text('Save Profile', style: TextStyle(fontSize: 16)),
           ),
           const SizedBox(height: 12),
           ListTile(

@@ -1,45 +1,45 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 /// Simple Cloudinary upload helper.
 ///
-/// This uses an unsigned upload preset configured in your Cloudinary dashboard.
-/// Set the values below before running the app.
+/// IMPORTANT: Replace `cloudName` and `uploadPreset` with your own values from
+/// your Cloudinary dashboard (unsigned preset) before using.
 class CloudinaryService {
-  // TODO: replace with your Cloudinary cloud name
-  static const String _cloudName = 'YOUR_CLOUD_NAME';
-  // TODO: replace with your unsigned upload preset
-  static const String _uploadPreset = 'YOUR_UPLOAD_PRESET';
+  // TODO: update with your Cloudinary settings
+  static const String cloudName = 'YOUR_CLOUD_NAME';
+  static const String uploadPreset = 'YOUR_UPLOAD_PRESET';
 
-  /// Uploads [file] to Cloudinary and returns the `secure_url`.
-  ///
-  /// Throws an exception if the upload fails.
-  static Future<String> uploadProfileImage(String uid, File file) async {
+  /// Uploads [file] to Cloudinary (unsigned) and returns the secure URL.
+  /// Optional [publicId] and [folder] can be provided to control storage path.
+  static Future<String> uploadImage(File file,
+      {String? publicId, String? folder}) async {
     final uri =
-        Uri.parse('https://api.cloudinary.com/v1_1/$_cloudName/image/upload');
+        Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
 
     final request = http.MultipartRequest('POST', uri);
-    request.fields['upload_preset'] = _uploadPreset;
-    // optional: you can add a folder or public_id
-    request.fields['folder'] = 'chatapp/profile_images';
-    request.fields['public_id'] = uid;
+    request.fields['upload_preset'] = uploadPreset;
+    if (folder != null) request.fields['folder'] = folder;
+    if (publicId != null) request.fields['public_id'] = publicId;
 
-    final multipartFile = await http.MultipartFile.fromPath('file', file.path);
-    request.files.add(multipartFile);
+    final multipart = await http.MultipartFile.fromPath('file', file.path);
+    request.files.add(multipart);
 
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final secureUrl = data['secure_url'] as String?;
-      if (secureUrl != null && secureUrl.isNotEmpty) return secureUrl;
-      throw Exception('Cloudinary: missing secure_url in response');
-    } else {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
           'Cloudinary upload failed: ${response.statusCode} ${response.body}');
     }
+
+    final body = json.decode(response.body) as Map<String, dynamic>;
+    final secureUrl = body['secure_url'] as String?;
+    if (secureUrl == null || secureUrl.isEmpty) {
+      throw Exception('Cloudinary response missing secure_url');
+    }
+    return secureUrl;
   }
 }
