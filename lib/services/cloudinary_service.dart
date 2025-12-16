@@ -9,8 +9,8 @@ import 'package:http/http.dart' as http;
 /// your Cloudinary dashboard (unsigned preset) before using.
 class CloudinaryService {
   // TODO: update with your Cloudinary settings
-  static const String cloudName = 'YOUR_CLOUD_NAME';
-  static const String uploadPreset = 'YOUR_UPLOAD_PRESET';
+  static const String cloudName = 'dzsr1xfvm';
+  static const String uploadPreset = 'peta_waktu_preset';
 
   /// Uploads [file] to Cloudinary (unsigned) and returns the secure URL.
   /// Optional [publicId] and [folder] can be provided to control storage path.
